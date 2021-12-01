@@ -1,0 +1,50 @@
+
+
+version: '3.8'
+
+#Docker Networks
+networks:
+  laravel:
+    driver: bridge
+
+#Volumes
+volumes:
+  dbdata:
+    driver: local
+
+# Workflow
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nginx
+    ports:
+      - "80:80"
+      # Port for xdebug (ensure this matches the remote_port in the xdebug.ini)    volumes:
+      - ./:/var/www
+      - ./docker/config/supervisor.conf:/etc/supervisord.conf
+      - ./docker/config/php.ini:/usr/local/etc/php/conf.d/app.ini
+      - ./docker/config/nginx.conf:/etc/nginx/sites-enabled/default
+    networks:
+      - laravel
+
+  db:
+    image: mysql:5.7
+    container_name: db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "33060:33060"
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: password
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - dbdata:/var/lib/mysql/
+    networks:
+      - laravel
+

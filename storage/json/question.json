@@ -1,0 +1,43 @@
+{
+    "security_question": [
+     
+        {
+            "value":"1",
+            "label": "What is your favourite movie?"
+        },
+     
+        {
+            "value":"2",
+            "label": "What is the name of your primary school?"
+        },
+        {
+            "value":"3",
+            "label": "What is the name of your first company?"
+        },
+        {
+            "value":"4",
+            "label": "What was your childhood nickname?"
+        },
+        {
+            "value":"5",
+            "label": "What was the brand of your first car"
+        },
+        {
+            "value":"6",
+            "label": "In what city were you born?"
+        },
+        {
+            "value":"7",
+            "label": "What is your favourite colour?"
+        },
+        {
+            "value":"8",
+            "label": "What is your favourite Malaysian food?"
+        },
+        {
+            "value":"9",
+            "question": "Who is your favourite celebrity?"
+        }
+       
+    ]
+ }

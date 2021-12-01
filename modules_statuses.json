@@ -1,0 +1,9 @@
+{
+    "Article": true,
+    "Tag": true,
+    "Comment": true,
+    "Client": true,
+    "Deposit": true,
+    "Withdraw": true,
+    "Transaction": true
+}
