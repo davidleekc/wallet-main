@@ -1,6 +1,6 @@
 
 
-version: '3.8'
+version: '3'
 
 #Docker Networks
 networks:
@@ -14,17 +14,28 @@ volumes:
 
 # Workflow
 services:
-  nginx:
+
+  php:
     build:
       context: .
       dockerfile: Dockerfile
+    image: laravel/starterapp
+    volumes:
+      - ./src:/var/www
+      - ./docker/config/php.ini:/usr/local/etc/php/conf.d/app.ini
+    ports:
+      - "9000:9000"
+    networks:
+      - laravel
+
+  nginx:
+    image: nginx:alpine
     container_name: nginx
     ports:
-      - "80:80"
-      # Port for xdebug (ensure this matches the remote_port in the xdebug.ini)    volumes:
+      - "8080:80"
+    volumes:
       - ./:/var/www
       - ./docker/config/supervisor.conf:/etc/supervisord.conf
-      - ./docker/config/php.ini:/usr/local/etc/php/conf.d/app.ini
       - ./docker/config/nginx.conf:/etc/nginx/sites-enabled/default
     networks:
       - laravel

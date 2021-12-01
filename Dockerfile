@@ -62,9 +62,9 @@ RUN chmod -R ug+w /var/www/storage
 RUN chmod -R ug+rwx /var/www/storage/logs/
 
 # Copy nginx/php/supervisor configs
-RUN cp ./docker/config/supervisor.conf /etc/supervisord.conf
-RUN cp ./docker/config/php.ini /usr/local/etc/php/conf.d/app.ini
-RUN cp ./docker/config/nginx.conf /etc/nginx/sites-enabled/default
+RUN cp ./docker/supervisor.conf /etc/supervisord.conf
+RUN cp ./docker/php.ini /usr/local/etc/php/conf.d/app.ini
+RUN cp ./docker/nginx.conf /etc/nginx/sites-enabled/default
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
@@ -83,9 +83,9 @@ RUN cp .env.example .env
 RUN composer install --optimize-autoloader --no-dev --working-dir="/var/www"
 RUN /var/www/artisan key:generate
 RUN /var/www/artisan storage:link
-RUN chmod +x /var/www/docker/config/run.sh
+RUN chmod +x /var/www/docker/run.sh
 
 USER www
 
 EXPOSE 8080
-ENTRYPOINT ["/var/www/docker/config/run.sh"]
+ENTRYPOINT ["/var/www/docker/run.sh"]
