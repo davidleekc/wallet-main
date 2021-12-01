@@ -79,6 +79,7 @@ RUN touch /var/log/php/errors.log && chmod 777 /var/log/php/errors.log
 RUN chmod -R +x /var/www/bootstrap/cache/
 RUN chmod -R +x /var/www/storage/
 
+RUN cp .env.example .env
 RUN composer install --optimize-autoloader --no-dev --working-dir="/var/www"
 RUN /var/www/artisan key:generate
 RUN /var/www/artisan storage:link
