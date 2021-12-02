@@ -94,7 +94,8 @@ RUN curl -sS https://getcomposer.org/installer | \
 #4.ADD-NGINX
 RUN apk add nginx
 COPY ./nginx/conf.d/default.conf /etc/nginx/conf.d/
-COPY ./nginx/nginx.conf /etc/nginx/
+COPY ./nginx/http.d/default.conf /etc/nginx/http.d/
+COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 COPY ./nginx/cert/ /etc/nginx/cert/
 
 COPY ./src/ /usr/share/nginx/html
@@ -164,6 +165,7 @@ RUN apk add redis
 COPY ./entrypoint.sh /usr/share/nginx/html/
 
 WORKDIR /usr/share/nginx/html
+EXPOSE 8080
 #CMD ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/conf.d/supervisord.conf"]
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["sh", "./entrypoint.sh"]
