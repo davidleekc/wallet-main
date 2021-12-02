@@ -101,14 +101,13 @@ COPY ./src/ /usr/share/nginx/html/
 RUN cp /usr/share/nginx/html/.env.example /usr/share/nginx/html/.env
 WORKDIR /usr/share/nginx/html
 
-RUN composer install
+RUN composer install -n --prefer-dist
+RUN chown -R www-data:www-data storage bootstrap
+RUN chmod -R 777 storage bootstrap
+
 RUN php /usr/share/nginx/html/artisan key:generate
 RUN php /usr/share/nginx/html/artisan storage:link
 RUN php /usr/share/nginx/html/artisan optimize
-
-RUN chmod -R 775 /usr/share/nginx/html/bootstrap/cache/
-RUN chmod -R 0777 /usr/share/nginx/html/storage/
-RUN chmod -R 0777 /usr/share/nginx/html/storage/logs
 
 #RUN mkdir -p /run/nginx
 #RUN touch /run/nginx/nginx.pid
@@ -134,7 +133,7 @@ RUN mkdir -p /var/log/cron \
 VOLUME /var/log/cron
 
 #7.ADD-REDIS
-#RUN apk add redis
+RUN apk add redis
 
 #8.ADD-MARIADB
 #RUN apk add mariadb=10.3.12-r2
