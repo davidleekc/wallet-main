@@ -165,7 +165,7 @@ RUN apk add redis
 COPY ./entrypoint.sh /usr/share/nginx/html/
 
 WORKDIR /usr/share/nginx/html
-EXPOSE 8080
+EXPOSE 80
 #CMD ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/conf.d/supervisord.conf"]
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["sh", "./entrypoint.sh"]
