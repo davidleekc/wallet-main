@@ -2,9 +2,9 @@
 FROM alpine
 
 # ensure www-data user exists
-# RUN set -x \
+RUN set -x \
 # 	&& addgroup -g 82  -S www-data \
-# 	&& adduser -u 82 -D -S -G www-data www-data
+	&& adduser -u 82 -D -S -G www-data www-data
 
 # Environments
 ENV TIMEZONE            Asia/Kuala_Lumpur
