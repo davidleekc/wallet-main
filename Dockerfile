@@ -161,7 +161,7 @@ VOLUME /var/log/cron
 
 #9.添加启动脚本
 # Define working directory.
-
+EXPOSE 8091
 COPY ./entrypoint.sh /usr/share/nginx/html/
 
 WORKDIR /usr/share/nginx/html
