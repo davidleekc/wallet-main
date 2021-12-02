@@ -93,20 +93,19 @@ RUN curl -sS https://getcomposer.org/installer | \
 
 #4.ADD-NGINX
 RUN apk add nginx
-COPY ./nginx/conf.d/default.conf /etc/nginx/conf.d/
-COPY ./nginx/http.d/default.conf /etc/nginx/http.d/
-COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
+COPY ./nginx/nginx.conf /etc/nginx/
 COPY ./nginx/cert/ /etc/nginx/cert/
 
 COPY ./src/ /usr/share/nginx/html
 RUN cp /usr/share/nginx/html/.env.example /usr/share/nginx/html/.env
+RUN mkdir -p /run/nginx
+RUN touch /run/nginx/nginx.pid
 WORKDIR /usr/share/nginx/html
 
 RUN composer install -n --prefer-dist
 RUN chown -R www-data:www-data storage bootstrap
-RUN chmod -R 777 storage bootstrap
-
-RUN php /usr/share/nginx/html/artisan key:generate
+RUN chmod -R 777 storage bootstrapRUN mkdir -p /run/nginx
+#RUN touch /run/nginx/nginx.pid
 RUN php /usr/share/nginx/html/artisan storage:link
 RUN php /usr/share/nginx/html/artisan optimize
 
@@ -134,7 +133,7 @@ RUN mkdir -p /var/log/cron \
 VOLUME /var/log/cron
 
 #7.ADD-REDIS
-RUN apk add redis
+#RUN apk add redis
 
 #8.ADD-MARIADB
 #RUN apk add mariadb=10.3.12-r2
@@ -163,9 +162,9 @@ RUN apk add redis
 # Define working directory.
 
 COPY ./entrypoint.sh /usr/share/nginx/html/
-
+USER root
 WORKDIR /usr/share/nginx/html
 EXPOSE 80
-#CMD ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/conf.d/supervisord.conf"]
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["sh", "./entrypoint.sh"]
