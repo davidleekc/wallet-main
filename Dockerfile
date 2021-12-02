@@ -104,8 +104,8 @@ WORKDIR /usr/share/nginx/html
 
 RUN composer install -n --prefer-dist
 RUN chown -R www-data:www-data storage bootstrap
-RUN chmod -R 777 storage bootstrapRUN mkdir -p /run/nginx
-#RUN touch /run/nginx/nginx.pid
+RUN chmod -R 777 storage bootstrap
+
 RUN php /usr/share/nginx/html/artisan storage:link
 RUN php /usr/share/nginx/html/artisan optimize
 
