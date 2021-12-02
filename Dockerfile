@@ -97,7 +97,7 @@ COPY ./nginx/conf.d/default.conf /etc/nginx/conf.d/
 COPY ./nginx/nginx.conf /etc/nginx/
 COPY ./nginx/cert/ /etc/nginx/cert/
 
-COPY ./src/ /usr/share/nginx/html/
+COPY ./src/ /usr/share/nginx/html
 RUN cp /usr/share/nginx/html/.env.example /usr/share/nginx/html/.env
 WORKDIR /usr/share/nginx/html
 
