@@ -2,9 +2,9 @@
 FROM alpine
 
 # ensure www-data user exists
-#RUN set -x \
-#	&& addgroup -g 82  -S www-data \
-#	&& adduser -u 82 -D -S -G www-data www-data
+# RUN set -x \
+# 	&& addgroup -g 82  -S www-data \
+# 	&& adduser -u 82 -D -S -G www-data www-data
 
 # Environments
 ENV TIMEZONE            Asia/Kuala_Lumpur
@@ -161,9 +161,10 @@ VOLUME /var/log/cron
 
 #9.添加启动脚本
 # Define working directory.
-WORKDIR /usr/share/nginx/html
-COPY ./entrypoint.sh /usr/share/nginx/html/
-RUN chmod +x /usr/share/nginx/html/entrypoint.sh
 
+COPY ./entrypoint.sh /usr/share/nginx/html/
+
+WORKDIR /usr/share/nginx/html
 #CMD ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/conf.d/supervisord.conf"]
-ENTRYPOINT ["./entrypoint.sh"]
+RUN chmod +x entrypoint.sh
+ENTRYPOINT ["sh", "./entrypoint.sh"]
