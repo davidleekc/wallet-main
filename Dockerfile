@@ -1,91 +1,169 @@
-FROM php:8.0-fpm
+#1.Base Image
+FROM alpine
 
-# Set working directory
-WORKDIR /var/www
+# ensure www-data user exists
+#RUN set -x \
+#	&& addgroup -g 82  -S www-data \
+#	&& adduser -u 82 -D -S -G www-data www-data
 
-# Add docker php ext repo
-ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+# Environments
+ENV TIMEZONE            Asia/Kuala_Lumpur
+ENV PHP_MEMORY_LIMIT    512M
+ENV MAX_UPLOAD          50M
+ENV PHP_MAX_FILE_UPLOAD 200
+ENV PHP_MAX_POST        100M
+ENV COMPOSER_ALLOW_SUPERUSER 1
 
-# Install php extensions
-RUN chmod +x /usr/local/bin/install-php-extensions && sync && \
-    install-php-extensions memcached
+#2.ADD-PHP-FPM
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpng-dev \
-    libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    locales \
-    zip \
-    jpegoptim optipng pngquant gifsicle \
-    unzip \
-    git \
-    libsodium-dev \
-    libonig-dev \
-    libcurl4-gnutls-dev \
-    lua-zlib-dev \
-    libmemcached-dev \
-    zlib1g-dev \
-    libxml2-dev \
-    libzip-dev \
-    nginx \
-    exiftool \
-    && docker-php-ext-configure gd \
-    && docker-php-ext-install -j$(nproc) gd \
-    && docker-php-ext-install curl mbstring \
-    && docker-php-ext-install pdo pdo_mysql \
-    && docker-php-ext-install mysqli \
-    && docker-php-ext-install exif \
-    && docker-php-ext-install pcntl \
-    && docker-php-ext-enable opcache \
-    && docker-php-ext-install zip \
-    && docker-php-source delete
+# Mirror mirror switch to Alpine Linux - http://dl-4.alpinelinux.org/alpine/
+RUN apk update \
+	&& apk upgrade \
+	&& apk add \
+		curl \
+		tzdata \
+		php7-fpm \
+	    php7 \
+	    php7-dev \
+	    php7-apcu \
+	    php7-bcmath \
+	    php7-xmlwriter \
+	    php7-ctype \
+	    php7-curl \
+	    php7-exif \
+	    php7-iconv \
+	    php7-intl \
+	    php7-json \
+	    php7-mbstring \
+	    php7-opcache \
+	    php7-openssl \
+	    php7-pcntl \
+	    php7-pdo \
+	    php7-mysqlnd \
+	    php7-mysqli \
+	    php7-pdo_mysql \
+	    php7-pdo_pgsql \
+	    php7-phar \
+	    php7-posix \
+	    php7-session \
+	    php7-xml \
+	    php7-simplexml \
+	    php7-mcrypt \
+	    php7-xsl \
+	    php7-zip \
+	    php7-zlib \
+	    php7-dom \
+	    php7-redis\
+	    php7-tokenizer \
+	    php7-gd \
+		php7-mongodb \
+		php7-fileinfo \
+		php7-zmq \
+		php7-memcached \
+		php7-xmlreader \
+ 	&& cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime \
+	&& echo "${TIMEZONE}" > /etc/timezone \
+	&& apk del tzdata \
+ 	&& rm -rf /var/cache/apk/*
 
-# Install supervisor
-RUN apt-get install -y supervisor
+# https://github.com/docker-library/php/issues/240
+# https://gist.github.com/guillemcanal/be3db96d3caa315b4e2b8259cab7d07e
+# https://forum.alpinelinux.org/forum/installation/php-iconv-issue
 
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /usr/local/var/log/php7/
+RUN mkdir -p /usr/local/var/run/
+COPY ./php/php-fpm.conf /etc/php7/
+COPY ./php/www.conf /etc/php7/php-fpm.d/
+
+#RUN apk add --no-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing gnu-libiconv
+#ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
+#RUN rm -rf /var/cache/apk/*
+
+# Set environments
+RUN sed -i "s|;*date.timezone =.*|date.timezone = ${TIMEZONE}|i" /etc/php7/php.ini && \
+	sed -i "s|;*memory_limit =.*|memory_limit = ${PHP_MEMORY_LIMIT}|i" /etc/php7/php.ini && \
+	sed -i "s|;*upload_max_filesize =.*|upload_max_filesize = ${MAX_UPLOAD}|i" /etc/php7/php.ini && \
+	sed -i "s|;*max_file_uploads =.*|max_file_uploads = ${PHP_MAX_FILE_UPLOAD}|i" /etc/php7/php.ini && \
+	sed -i "s|;*post_max_size =.*|post_max_size = ${PHP_MAX_POST}|i" /etc/php7/php.ini && \
+	sed -i "s|;*cgi.fix_pathinfo=.*|cgi.fix_pathinfo= 0|i" /etc/php7/php.ini
+
+#3.Install-Composer
+RUN curl -sS https://getcomposer.org/installer | \
+    php -- --install-dir=/usr/bin/ --filename=composer
+
+#4.ADD-NGINX
+RUN apk add nginx
+COPY ./nginx/conf.d/default.conf /etc/nginx/conf.d/
+COPY ./nginx/nginx.conf /etc/nginx/
+COPY ./nginx/cert/ /etc/nginx/cert/
+
+COPY ./src/ /usr/share/nginx/html/
+RUN cp /usr/share/nginx/html/.env.example /usr/share/nginx/html/.env
+WORKDIR /usr/share/nginx/html
+
+RUN composer install
+RUN php /usr/share/nginx/html/artisan key:generate
+RUN php /usr/share/nginx/html/artisan storage:link
+RUN php /usr/share/nginx/html/artisan optimize
+
+RUN chmod -R 775 /usr/share/nginx/html/bootstrap/cache/
+RUN chmod -R 0777 /usr/share/nginx/html/storage/
+RUN chmod -R 0777 /usr/share/nginx/html/storage/logs
+
+#RUN mkdir -p /run/nginx
+#RUN touch /run/nginx/nginx.pid
+# Expose volumes
+
+VOLUME ["/usr/share/nginx/html", "/usr/local/var/log/php7", "/var/run/"]
+WORKDIR /usr/share/nginx/html
+
+#5.ADD-SUPERVISOR
+RUN apk add supervisor \
+ && rm -rf /var/cache/apk/*
+
+# Define mountable directories.
+VOLUME ["/etc/supervisor/conf.d", "/var/log/supervisor/"]
+COPY ./supervisor/conf.d/ /etc/supervisor/conf.d/
+
+#6.ADD-CRONTABS
+COPY ./crontabs/default /var/spool/cron/crontabs/
+RUN cat /var/spool/cron/crontabs/default >> /var/spool/cron/crontabs/root
+RUN mkdir -p /var/log/cron \
+ && touch /var/log/cron/cron.log
+
+VOLUME /var/log/cron
+
+#7.ADD-REDIS
+#RUN apk add redis
+
+#8.ADD-MARIADB
+#RUN apk add mariadb=10.3.12-r2
+#VOLUME /var/lib/mysql
+
+#设置环境变量，便于管理
+#ENV MARIADB_USER root
+#ENV MARIADB_PASS 123456
+##初始化数据库
+#COPY ./mariadb/db_init.sh /etc/
+#RUN chmod 775 /etc/db_init.sh
+#RUN /etc/db_init.sh
+
+#导出端口
+#EXPOSE 3306
+
+#添加启动文件
+#ADD ./mariadb/run.sh /root/run.sh
+#RUN chmod 775 /root/run.sh
+#设置默认启动命令
+#CMD ["/root/run.sh"]
 
 
-# Add user for laravel application
-RUN groupadd -g 1000 www
-RUN useradd -u 1000 -ms /bin/bash -g www www
 
-# Copy code to /var/www
-COPY --chown=www:www-data . /var/www
-COPY ./composer.lock ./composer.json /var/www/
+#9.添加启动脚本
+# Define working directory.
+WORKDIR /usr/share/nginx/html
+COPY ./entrypoint.sh /usr/share/nginx/html/
+RUN chmod +x /usr/share/nginx/html/entrypoint.sh
 
-# add root to www group
-RUN chmod -R ug+w /var/www/storage
-RUN chmod -R ug+rwx /var/www/storage/logs/
-
-# Copy nginx/php/supervisor configs
-RUN cp ./docker/supervisor.conf /etc/supervisord.conf
-RUN cp ./docker/php.ini /usr/local/etc/php/conf.d/app.ini
-RUN cp ./docker/nginx.conf /etc/nginx/sites-enabled/default
-
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-RUN chown -R www:www /var/www/artisan && \
-    chmod -R ugo+rx /var/www/artisan
-
-
-# PHP Error Log Files
-RUN mkdir /var/log/php
-RUN touch /var/log/php/errors.log && chmod 777 /var/log/php/errors.log
-
-RUN chmod -R +x /var/www/bootstrap/cache/
-RUN chmod -R +x /var/www/storage/
-
-RUN cp .env.example .env
-RUN composer install --optimize-autoloader --no-dev --working-dir="/var/www"
-RUN /var/www/artisan key:generate
-RUN /var/www/artisan storage:link
-RUN chmod +x /var/www/docker/run.sh
-
-USER www
-
-EXPOSE 8080
-ENTRYPOINT ["/var/www/docker/run.sh"]
+#CMD ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/conf.d/supervisord.conf"]
+ENTRYPOINT ["./entrypoint.sh"]

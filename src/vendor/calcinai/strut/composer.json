@@ -1,0 +1,14 @@
+{
+  "name": "calcinai/strut",
+  "description": "Library for creating and manipulating Swagger schemas",
+  "license": "MIT",
+
+
+  "require": {
+  },
+
+  "autoload": {
+    "psr-4": { "Calcinai\\Strut\\": "src/" }
+  }
+
+}
