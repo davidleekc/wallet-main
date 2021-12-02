@@ -166,9 +166,9 @@ VOLUME /var/log/cron
 # Define working directory.
 
 COPY ./entrypoint.sh /usr/share/nginx/html/
-USER root
+USER  wwww-data
 WORKDIR /usr/share/nginx/html
 EXPOSE 80
-CMD ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/conf.d/supervisord.conf"]
+#CMD ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/conf.d/supervisord.conf"]
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["sh", "./entrypoint.sh"]
