@@ -3,7 +3,7 @@ FROM alpine
 
 # ensure www-data user exists
 RUN set -x \
- 	&& addgroup -g 82  -S www-data \
+# 	&& addgroup -g 82  -S www-data \
 	&& adduser -u 82 -D -S -G www-data www-data
 
 # Environments
@@ -166,7 +166,7 @@ VOLUME /var/log/cron
 # Define working directory.
 
 COPY ./entrypoint.sh /usr/share/nginx/html/
-USER  wwww-data
+USER www-data
 WORKDIR /usr/share/nginx/html
 EXPOSE 80
 #CMD ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/conf.d/supervisord.conf"]
