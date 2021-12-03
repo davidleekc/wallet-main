@@ -165,19 +165,21 @@ VOLUME /var/log/cron
 #设置默认启动命令
 #CMD ["/root/run.sh"]
 COPY ./entrypoint.sh /usr/share/nginx/html/
-RUN chmod ug+rwx entrypoint.sh
-RUN chmod -R ug+rwx /var/run/ && \
-    chown -R www-data:www-data /var/run/
 
 WORKDIR /usr/share/nginx/html
+
+RUN chown www-data:www-data /usr/share/nginx/html/entrypoint.sh && \
+    chmod ug+rwx /usr/share/nginx/html/entrypoint.sh
+RUN chmod -R ug+rwx /var/run/ && \
+    chown -R www-data:www-data /var/run/
 
 #9.添加启动脚本
 # Define working directory.
 EXPOSE 80
 
-USER www-data
-
 ENTRYPOINT ["sh", "./entrypoint.sh"]
+
+USER www-data
 
 #CMD ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/conf.d/supervisord.conf"]
 
