@@ -168,8 +168,7 @@ COPY ./entrypoint.sh /usr/share/nginx/html/
 
 WORKDIR /usr/share/nginx/html
 
-RUN chown www-data:www-data /usr/share/nginx/html/entrypoint.sh && \
-    chmod ug+rwx /usr/share/nginx/html/entrypoint.sh
+RUN chmod ug+rwx /usr/share/nginx/html/entrypoint.sh
 RUN chmod -R ug+rwx /var/run/ && \
     chown -R www-data:www-data /var/run/
 
