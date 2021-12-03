@@ -166,7 +166,7 @@ VOLUME /var/log/cron
 #CMD ["/root/run.sh"]
 COPY ./entrypoint.sh /usr/share/nginx/html/
 RUN chmod ug+rwx entrypoint.sh
-RUN chmod ug+rwx /var/run/supervisord.pid
+RUN chown www-data:www-data /var/run/supervisord.pid
 
 WORKDIR /usr/share/nginx/html
 
