@@ -168,6 +168,7 @@ WORKDIR /usr/share/nginx/html
 EXPOSE 80
 
 USER www-data
+
 ENTRYPOINT ["sh", "./entrypoint.sh"]
 
 #CMD ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/conf.d/supervisord.conf"]
