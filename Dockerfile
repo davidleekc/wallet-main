@@ -75,8 +75,7 @@ RUN apk update \
 RUN mkdir -p /usr/local/var/log/php7/
 RUN chmod -R 755 /usr/local/var/log/php7/ && \
     chown -R www-data:www-data /usr/local/var/log/php7/
-RUN chmod -R 755 /var/lib/nginx/ && \
-    chown -R www-data:www-data /var/lib/nginx/
+
 RUN mkdir -p /usr/local/var/run/
 COPY ./php/php-fpm.conf /etc/php7/
 COPY ./php/www.conf /etc/php7/php-fpm.d/
@@ -108,6 +107,8 @@ COPY ./src/ /usr/share/nginx/html
 RUN cp /usr/share/nginx/html/.env.example /usr/share/nginx/html/.env
 RUN mkdir -p /run/nginx
 RUN touch /run/nginx/nginx.pid
+RUN chmod -R 755 /var/lib/nginx/ && \
+    chown -R www-data:www-data /var/lib/nginx/
 WORKDIR /usr/share/nginx/html
 
 RUN composer install -n --prefer-dist
