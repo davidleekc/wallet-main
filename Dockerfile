@@ -1,10 +1,12 @@
 #1.Base Image
 FROM alpine
 
-# ensure www-data user exists
-RUN set -x \
-# 	&& addgroup -g 82  -S www-data \
-	&& adduser -u 82 -D -S -G www-data www-data
+USER root
+
+# ensure root user exists
+#RUN set -x \
+# 	&& addgroup -g 82  -S root \
+#	&& adduser -u 82 -D -S -G root root
 
 # Environments
 ENV TIMEZONE            Asia/Kuala_Lumpur
@@ -74,7 +76,7 @@ RUN apk update \
 
 RUN mkdir -p /usr/local/var/log/php7/
 RUN chmod -R 755 /usr/local/var/log/php7/ && \
-    chown -R www-data:www-data /usr/local/var/log/php7/
+    chown -R root:root /usr/local/var/log/php7/
 
 RUN mkdir -p /usr/local/var/run/
 COPY ./php/php-fpm.conf /etc/php7/
@@ -108,11 +110,11 @@ RUN cp /usr/share/nginx/html/.env.example /usr/share/nginx/html/.env
 RUN mkdir -p /run/nginx
 RUN touch /run/nginx/nginx.pid
 RUN chmod -R 755 /var/lib/nginx/ && \
-    chown -R www-data:www-data /var/lib/nginx/
+    chown -R root:root /var/lib/nginx/
 WORKDIR /usr/share/nginx/html
 
 RUN composer install -n --prefer-dist
-RUN chown -R www-data:www-data storage bootstrap
+RUN chown -R root:root storage bootstrap
 RUN chmod -R 777 storage bootstrap
 
 RUN php /usr/share/nginx/html/artisan storage:link
@@ -170,15 +172,15 @@ WORKDIR /usr/share/nginx/html
 
 RUN chmod ug+rwx /usr/share/nginx/html/entrypoint.sh
 RUN chmod -R ug+rwx /var/run/ && \
-    chown -R www-data:www-data /var/run/
+    chown -R root:root /var/run/
 
 #9.添加启动脚本
 # Define working directory.
-EXPOSE 80
+EXPOSE 8080
 
 ENTRYPOINT ["sh", "./entrypoint.sh"]
 
-USER www-data
+
 
 #CMD ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/conf.d/supervisord.conf"]
 
