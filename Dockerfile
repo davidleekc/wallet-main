@@ -73,6 +73,10 @@ RUN apk update \
 # https://forum.alpinelinux.org/forum/installation/php-iconv-issue
 
 RUN mkdir -p /usr/local/var/log/php7/
+RUN chmod -R 755 /usr/local/var/log/php7/ && \
+    chown -R www-data:www-data /usr/local/var/log/php7/
+RUN chmod -R 755 /var/lib/nginx/ && \
+    chown -R www-data:www-data /var/lib/nginx/
 RUN mkdir -p /usr/local/var/run/
 COPY ./php/php-fpm.conf /etc/php7/
 COPY ./php/www.conf /etc/php7/php-fpm.d/
@@ -161,6 +165,8 @@ VOLUME /var/log/cron
 #CMD ["/root/run.sh"]
 COPY ./entrypoint.sh /usr/share/nginx/html/
 RUN chmod ug+rwx entrypoint.sh
+RUN chmod ug+rwx /var/run/supervisord.pid
+
 WORKDIR /usr/share/nginx/html
 
 #9.添加启动脚本
