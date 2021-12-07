@@ -36,7 +36,7 @@
         },
         {
             "value":"9",
-            "question": "Who is your favourite celebrity?"
+            "label": "Who is your favourite celebrity?"
         }
        
     ]
